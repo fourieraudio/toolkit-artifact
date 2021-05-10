@@ -13,9 +13,13 @@ export async function createGZipFileOnDisk(
   originalFilePath: string,
   tempFilePath: string
 ): Promise<number> {
-  return new Promise((resolve, reject) => {
-    const inputStream = fs.createReadStream(originalFilePath, {
-      flags: fs.constants.O_RDONLY | fs.constants.O_SYMLINK
+  return new Promise(async (resolve, reject) => {
+    const inputFile = await fs.promises.open(
+      originalFilePath,
+      fs.constants.O_RDONLY | fs.constants.O_SYMLINK
+    )
+    const inputStream = fs.createReadStream('', {
+      fd: inputFile
     })
     const gzip = zlib.createGzip()
     const outputStream = fs.createWriteStream(tempFilePath)
@@ -42,8 +46,12 @@ export async function createGZipFileInBuffer(
   originalFilePath: string
 ): Promise<Buffer> {
   return new Promise(async resolve => {
-    const inputStream = fs.createReadStream(originalFilePath, {
-      flags: fs.constants.O_RDONLY | fs.constants.O_SYMLINK
+    const inputFile = await fs.promises.open(
+      originalFilePath,
+      fs.constants.O_RDONLY | fs.constants.O_SYMLINK
+    )
+    const inputStream = fs.createReadStream('', {
+      fd: inputFile
     })
     const gzip = zlib.createGzip()
     inputStream.pipe(gzip)
