@@ -237,7 +237,14 @@ export class UploadHttpClient {
 
       if (totalFileSize < buffer.byteLength) {
         // compression did not help with reducing the size, use a readable stream from the original file for upload
-        openUploadStream = () => fs.createReadStream(parameters.file)
+        const file = await fs.promises.open(
+          parameters.file,
+          fs.constants.O_RDONLY | fs.constants.O_SYMLINK
+        )
+        openUploadStream = () =>
+          fs.createReadStream('', {
+            fd: file
+          })
         isGzip = false
         uploadFileSize = totalFileSize
       } else {
